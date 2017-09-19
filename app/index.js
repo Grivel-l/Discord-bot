@@ -1,4 +1,6 @@
 const Discord = require('discord.js');
+const fetch = require('node-fetch');
+const cheerio = require('cheerio');
 
 const Config = require('./config');
 
@@ -21,9 +23,31 @@ function cleanUser(username) {
   users[username].timestamp = null;
 }
 
-function answer(content, message, username) {
-  message.reply(content);
+function answer(content, message, username, file = null) {
+  if (file !== null) {
+    message.reply(content, {files: [file]});
+  } else {
+    message.reply(content);
+  }
   cleanUser(username);
+}
+
+function getCat() {
+  return fetch('http://random.cat')
+  .then(response => response.text())
+  .then(htmlString => {
+    const $ = cheerio.load(htmlString);
+    return `http://random.cat/${$('#cat')[0].attribs.src}`;
+  });
+}
+
+function getDog() {
+  return fetch('http://random.dog')
+  .then(response => response.text())
+  .then(htmlString => {
+    const $ = cheerio.load(htmlString);
+    return `https://random.dog/${$('img').attr('id', 'dog-img')[0].attribs.src}`;
+  });
 }
 
 client.on('ready', () => {
@@ -68,7 +92,17 @@ client.on('message', message => {
   
   if (users[username].action === 'adopting') {
     if (animals.includes(messageContent)) {
-      answer(`Here ${messageContent.substring(messageContent.length - 1) === 's' ? 'are' : 'is'} your ${messageContent}`, message, username);
+      if (messageContent.includes('cat')) {
+        getCat()
+        .then(url => {
+          answer(`Here ${messageContent.substring(messageContent.length - 1) === 's' ? 'are' : 'is'} your ${messageContent}`, message, username, url);
+        });
+      } else {
+        getDog()
+        .then(url => {
+          answer(`Here ${messageContent.substring(messageContent.length - 1) === 's' ? 'are' : 'is'} your ${messageContent}`, message, username, url);
+        });
+      }
     }
   }
 });
