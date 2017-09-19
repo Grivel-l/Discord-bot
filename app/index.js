@@ -1,14 +1,16 @@
 const Discord = require('discord.js');
-const fetch = require('node-fetch');
-const cheerio = require('cheerio');
 
 const Config = require('./config');
+const {
+  salute,
+  positiveAnswers,
+  negativeAnswers,
+  animals
+} = require('./sentences');
+const getCat = require('./api/getCat');
+const getDog = require('./api/getDog');
 
 const client = new Discord.Client();
-const salute = ['hello', 'salut', 'bonjour', 'yo', 'bonsoir'];
-const positiveAnswers = ['yes', 'sure', 'of course', 'yep'];
-const negativeAnswers = ['no', 'nop', 'nope', 'don\'t'];
-const animals = ['cat', 'dog', 'cats', 'dogs'];
 const users = {};
 
 function upper(content) {
@@ -30,24 +32,6 @@ function answer(content, message, username, file = null) {
     message.reply(content);
   }
   cleanUser(username);
-}
-
-function getCat() {
-  return fetch('http://random.cat')
-  .then(response => response.text())
-  .then(htmlString => {
-    const $ = cheerio.load(htmlString);
-    return `http://random.cat/${$('#cat')[0].attribs.src}`;
-  });
-}
-
-function getDog() {
-  return fetch('http://random.dog')
-  .then(response => response.text())
-  .then(htmlString => {
-    const $ = cheerio.load(htmlString);
-    return `https://random.dog/${$('img').attr('id', 'dog-img')[0].attribs.src}`;
-  });
 }
 
 client.on('ready', () => {
