@@ -6,7 +6,8 @@ const {
   positiveAnswers,
   negativeAnswers,
   animals,
-  photo
+  photo,
+  want
 } = require('./sentences');
 const getCat = require('./api/getCat');
 const getDog = require('./api/getDog');
@@ -92,8 +93,7 @@ client.on('message', message => {
     message.reply(upper(messageContent));
   }
 
-  if ((messageContent.includes('would like') ||
-    messageContent.includes('want')) &&
+  if (contain(messageContent, want) &&
     messageContent.includes('adopt') &&
     messageContent.includes('animal')) {
     if (users[username].action === null) {
