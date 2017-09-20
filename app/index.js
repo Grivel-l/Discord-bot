@@ -5,7 +5,8 @@ const {
   salute,
   positiveAnswers,
   negativeAnswers,
-  animals
+  animals,
+  photo
 } = require('./sentences');
 const getCat = require('./api/getCat');
 const getDog = require('./api/getDog');
@@ -32,6 +33,31 @@ function answer(content, message, username, file = null) {
     message.reply(content);
   }
   cleanUser(username);
+}
+
+function contain(message, tab) {
+  let contain = false;
+  tab.map(keyword => {
+    if (message.includes(keyword)) {
+      contain = true;
+    }
+  });
+
+  return contain;
+}
+
+function sendPicture(type, messageContent, message, username) {
+  if (type === 'cat') {
+    getCat()
+    .then(url => {
+      answer(`Here is your cat`, message, username, url);
+    });
+  } else {
+    getDog()
+    .then(url => {
+      answer(`Here is your dog`, message, username, url);
+    });
+  }
 }
 
 client.on('ready', () => {
@@ -77,18 +103,21 @@ client.on('message', message => {
   if (users[username].action === 'adopting') {
     if (animals.includes(messageContent)) {
       if (messageContent.includes('cat')) {
-        getCat()
-        .then(url => {
-          answer(`Here ${messageContent.substring(messageContent.length - 1) === 's' ? 'are' : 'is'} your ${messageContent}`, message, username, url);
-        });
+        sendPicture('cat');
       } else {
-        getDog()
-        .then(url => {
-          answer(`Here ${messageContent.substring(messageContent.length - 1) === 's' ? 'are' : 'is'} your ${messageContent}`, message, username, url);
-        });
+        sendPicture('dog');
       }
     }
   }
+
+  if (messageContent.includes('send') &&
+    contain(messageContent, photo)) {
+      if (contain(messageContent, ['cat', 'cats'])) {
+        sendPicture('cat', messageContent, message, username);
+      } else if (contain(messageContent, ['dog', 'dogs'])) {
+        sendPicture('dog', messageContent, message, username);
+      }
+    }
 });
 
 client.login(Config.botToken);
