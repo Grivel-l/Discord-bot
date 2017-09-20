@@ -27,6 +27,7 @@ function cleanUser(username) {
 }
 
 function answer(content, message, username, file = null) {
+  message.channel.stopTyping();
   if (file !== null) {
     message.reply(content, {files: [file]});
   } else {
@@ -47,6 +48,7 @@ function contain(message, tab) {
 }
 
 function sendPicture(type, messageContent, message, username) {
+  message.channel.startTyping();
   if (type === 'cat') {
     getCat()
     .then(url => {
@@ -103,9 +105,9 @@ client.on('message', message => {
   if (users[username].action === 'adopting') {
     if (animals.includes(messageContent)) {
       if (messageContent.includes('cat')) {
-        sendPicture('cat');
+        sendPicture('cat', messageContent, message, username);
       } else {
-        sendPicture('dog');
+        sendPicture('dog', messageContent, message, username);
       }
     }
   }
